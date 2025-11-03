@@ -1,3 +1,4 @@
+// Event name constant for Bluetooth permission result
 import type { PluginListenerHandle } from '@capacitor/core';
 
 export interface BluetoothSerialPlugin {
@@ -81,12 +82,18 @@ export interface BluetoothSerialPlugin {
   addListener(eventName: 'onRead', listenerFunc: (result: BluetoothReadResult) => void): Promise<PluginListenerHandle>;
 
   /**
-   * Listen for bluetooth state changed
+   * Listen for device input value
    * @since 0.0.5
    */
+  addListener(eventName: 'onRead', listenerFunc: (result: BluetoothReadResult) => void): Promise<PluginListenerHandle>;
+
+  /**
+   * Listen for bluetooth state changed
+   * @since 7.5.1
+   */
   addListener(
-    eventName: 'onEnabledChanged',
-    listenerFunc: (result: BluetoothState) => void,
+    eventName: 'onBluetoothPermissionResult',
+    listenerFunc: (result: PermissionState) => void,
   ): Promise<PluginListenerHandle>;
 
   /**
@@ -103,6 +110,10 @@ export interface PairedBluetoothDevice {
 
 export interface BluetoothState {
   enabled: boolean;
+}
+
+export interface PermissionState {
+  granted: boolean;
 }
 
 export interface BluetoothScanResult {
@@ -159,3 +170,5 @@ export interface PairedBluetoothDevice {
   /** Device MAC address */
   address: string;
 }
+
+export const ON_BLUETOOTH_PERMISSION_RESULT_EVENT = 'onBluetoothPermissionResult';

@@ -2,6 +2,8 @@
 
 var core = require('@capacitor/core');
 
+const ON_BLUETOOTH_PERMISSION_RESULT_EVENT = 'onBluetoothPermissionResult';
+
 const BluetoothSerial = core.registerPlugin('BluetoothSerial', {
     web: () => Promise.resolve().then(function () { return web; }).then((m) => new m.BluetoothSerialWeb()),
 });
@@ -105,4 +107,5 @@ var web = /*#__PURE__*/Object.freeze({
 });
 
 exports.BluetoothSerial = BluetoothSerial;
+exports.ON_BLUETOOTH_PERMISSION_RESULT_EVENT = ON_BLUETOOTH_PERMISSION_RESULT_EVENT;
 //# sourceMappingURL=plugin.cjs.js.map

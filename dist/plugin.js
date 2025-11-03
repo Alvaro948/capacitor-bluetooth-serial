@@ -1,6 +1,8 @@
 var capacitorBluetoothSerialPlugin = (function (exports, core) {
     'use strict';
 
+    const ON_BLUETOOTH_PERMISSION_RESULT_EVENT = 'onBluetoothPermissionResult';
+
     const BluetoothSerial = core.registerPlugin('BluetoothSerial', {
         web: () => Promise.resolve().then(function () { return web; }).then((m) => new m.BluetoothSerialWeb()),
     });
@@ -104,6 +106,7 @@ var capacitorBluetoothSerialPlugin = (function (exports, core) {
     });
 
     exports.BluetoothSerial = BluetoothSerial;
+    exports.ON_BLUETOOTH_PERMISSION_RESULT_EVENT = ON_BLUETOOTH_PERMISSION_RESULT_EVENT;
 
     return exports;
 

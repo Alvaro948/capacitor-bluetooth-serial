@@ -343,17 +343,17 @@
       },
       {
         "name": "addListener",
-        "signature": "(eventName: 'onEnabledChanged', listenerFunc: (result: BluetoothState) => void) => Promise<PluginListenerHandle>",
+        "signature": "(eventName: 'onRead', listenerFunc: (result: BluetoothReadResult) => void) => Promise<PluginListenerHandle>",
         "parameters": [
           {
             "name": "eventName",
             "docs": "",
-            "type": "'onEnabledChanged'"
+            "type": "'onRead'"
           },
           {
             "name": "listenerFunc",
             "docs": "",
-            "type": "(result: BluetoothState) => void"
+            "type": "(result: BluetoothReadResult) => void"
           }
         ],
         "returns": "Promise<PluginListenerHandle>",
@@ -363,12 +363,41 @@
             "text": "0.0.5"
           }
         ],
+        "docs": "Listen for device input value",
+        "complexTypes": [
+          "PluginListenerHandle",
+          "BluetoothReadResult"
+        ],
+        "slug": "addlisteneronread-"
+      },
+      {
+        "name": "addListener",
+        "signature": "(eventName: 'onBluetoothPermissionResult', listenerFunc: (result: PermissionState) => void) => Promise<PluginListenerHandle>",
+        "parameters": [
+          {
+            "name": "eventName",
+            "docs": "",
+            "type": "'onBluetoothPermissionResult'"
+          },
+          {
+            "name": "listenerFunc",
+            "docs": "",
+            "type": "(result: PermissionState) => void"
+          }
+        ],
+        "returns": "Promise<PluginListenerHandle>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "7.5.1"
+          }
+        ],
         "docs": "Listen for bluetooth state changed",
         "complexTypes": [
           "PluginListenerHandle",
-          "BluetoothState"
+          "PermissionState"
         ],
-        "slug": "addlisteneronenabledchanged-"
+        "slug": "addlisteneronbluetoothpermissionresult-"
       },
       {
         "name": "removeAllListeners",
@@ -661,9 +690,49 @@
           "type": "() => Promise<void>"
         }
       ]
+    },
+    {
+      "name": "PermissionState",
+      "slug": "permissionstate",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "granted",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "boolean"
+        }
+      ]
     }
   ],
   "enums": [],
-  "typeAliases": [],
+  "typeAliases": [
+    {
+      "name": "PermissionState",
+      "slug": "permissionstate",
+      "docs": "",
+      "types": [
+        {
+          "text": "'prompt'",
+          "complexTypes": []
+        },
+        {
+          "text": "'prompt-with-rationale'",
+          "complexTypes": []
+        },
+        {
+          "text": "'granted'",
+          "complexTypes": []
+        },
+        {
+          "text": "'denied'",
+          "complexTypes": []
+        }
+      ]
+    }
+  ],
   "pluginConfigs": []
 }

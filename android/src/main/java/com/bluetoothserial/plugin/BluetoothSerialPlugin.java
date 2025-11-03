@@ -1,3 +1,4 @@
+// Event name constant for Bluetooth permission result
 package com.bluetoothserial.plugin;
 
 import android.Manifest;
@@ -35,29 +36,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-@CapacitorPlugin(
-    name = "BluetoothSerial",
-    permissions = {
-        @Permission(
-            strings = {
+@CapacitorPlugin(name = "BluetoothSerial", permissions = {
+        @Permission(strings = {
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.BLUETOOTH,
                 Manifest.permission.BLUETOOTH_ADMIN
-            },
-            alias = BluetoothSerialPlugin.BLUETOOTH
-        ),
-        @Permission(
-            strings = { Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN },
-            alias = BluetoothSerialPlugin.BLUETOOTH_API_31
-        )
-    }
-)
+        }, alias = BluetoothSerialPlugin.BLUETOOTH),
+        @Permission(strings = { Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN }, alias = BluetoothSerialPlugin.BLUETOOTH_API_31)
+})
 public class BluetoothSerialPlugin extends Plugin {
 
     // Permission alias constants
     public static final String BLUETOOTH = "bluetooth";
     public static final String BLUETOOTH_API_31 = "bluetooth-31";
+
+    // Event name constant for Bluetooth permission result
+    public static final String ON_BLUETOOTH_PERMISSION_RESULT_EVENT = "onBluetoothPermissionResult";
 
     // Log tag
     private static final String TAG_PERMISSION = "permission";
@@ -97,7 +93,8 @@ public class BluetoothSerialPlugin extends Plugin {
             return;
         }
 
-        // Version prior API 31 (S) and after or equals 33 (TIRAMISU) cannot enable bluetooth
+        // Version prior API 31 (S) and after or equals 33 (TIRAMISU) cannot enable
+        // bluetooth
         if (!getCanEnable()) {
             Log.w(getLogTag(), "Enabling bluetooth are not allowed by API " + Build.VERSION.SDK_INT + " - skipping");
             resolveState(call, false);
@@ -106,9 +103,7 @@ public class BluetoothSerialPlugin extends Plugin {
 
         // Ask permission, and enable if need
         if (checkBluetoothPermissions(call)) {
-            Log.d(getLogTag(), "Enabling bluetooth...");
             boolean enabled = bluetoothAdapter.enable();
-            Log.d(getLogTag(), "Enabling bluetooth " + (enabled ? "[OK]" : "[KO]"));
             resolveState(call, enabled);
         }
     }
@@ -122,7 +117,8 @@ public class BluetoothSerialPlugin extends Plugin {
             return;
         }
 
-        // Version prior API 31 (S) and after or equals 33 (TIRAMISU) cannot diable bluetooth
+        // Version prior API 31 (S) and after or equals 33 (TIRAMISU) cannot diable
+        // bluetooth
         if (!getCanEnable()) {
             Log.w(getLogTag(), "Enabling bluetooth are not allowed by API " + Build.VERSION.SDK_INT + " - skipping");
             resolveState(call, true);
@@ -131,7 +127,6 @@ public class BluetoothSerialPlugin extends Plugin {
 
         // Ask permission, and enable if need
         if (checkBluetoothPermissions(call)) {
-            Log.d(getLogTag(), "Disabling bluetooth...");
             boolean disabled = bluetoothAdapter.disable();
             resolveState(call, !disabled);
         }
@@ -189,8 +184,7 @@ public class BluetoothSerialPlugin extends Plugin {
         }
 
         if (bluetoothAdapter.isDiscovering()) {
-            boolean cancelled = bluetoothAdapter.cancelDiscovery();
-            Log.d(getLogTag(), "Canceling previous scan... " + cancelled);
+            bluetoothAdapter.cancelDiscovery();
         }
 
         try {
@@ -209,7 +203,6 @@ public class BluetoothSerialPlugin extends Plugin {
                             devices.add(device);
                             break;
                         case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:
-                            Log.d(getLogTag(), String.format("Scan finished: %s devices found", devices.size()));
                             resolveScanDevices(call, devices);
                             context.unregisterReceiver(this);
                             break;
@@ -226,7 +219,6 @@ public class BluetoothSerialPlugin extends Plugin {
             if (started) {
                 new Handler().postDelayed(bluetoothAdapter::cancelDiscovery, 5000);
             } else {
-                Log.d(getLogTag(), "Cannot scan bluetooth devices !");
                 context.unregisterReceiver(receiver);
                 call.reject(ERROR_SCAN_FAILED);
             }
@@ -282,9 +274,10 @@ public class BluetoothSerialPlugin extends Plugin {
             return;
         }
 
-        /* TODO - autoConnect
-        Boolean autoConnect = call.getBoolean(keyAutoConnect);
-        autoConnect = autoConnect == null ? false : autoConnect;
+        /*
+         * TODO - autoConnect
+         * Boolean autoConnect = call.getBoolean(keyAutoConnect);
+         * autoConnect = autoConnect == null ? false : autoConnect;
          */
 
         connectCall = call;
@@ -431,8 +424,7 @@ public class BluetoothSerialPlugin extends Plugin {
                                     Log.e(getLogTag(), "Error in notifyListeners: " + e.getLocalizedMessage(), e);
                                 }
                             }
-                        }
-                    );
+                        });
                 call.resolve();
             } else {
                 call.reject("Required Android API >= " + android.os.Build.VERSION_CODES.N);
@@ -482,7 +474,8 @@ public class BluetoothSerialPlugin extends Plugin {
     public Map<String, PermissionState> getPermissionStates() {
         Map<String, PermissionState> permissionStates = super.getPermissionStates();
 
-        // If Bluetooth is not in the manifest and therefore not required, say the permission is granted
+        // If Bluetooth is not in the manifest and therefore not required, say the
+        // permission is granted
         String permissionAlias = getPermissionAlias();
         if (!isPermissionDeclared(permissionAlias)) {
             permissionStates.put(permissionAlias, PermissionState.GRANTED);
@@ -493,33 +486,14 @@ public class BluetoothSerialPlugin extends Plugin {
 
     @PluginMethod
     public boolean checkBluetoothPermissions(PluginCall call) {
-        Context context = getContext();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Android 12+ explicit permission request
-            if (
-                ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    getActivity(),
-                    new String[] { Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT },
-                    1
-                );
-                Log.d(getLogTag(), "Requesting Bluetooth permissions (Android 12+)");
-                call.reject("Bluetooth permissions required");
-                return false;
-            }
-        }
         return checkPermissions(call, getPermissionAlias());
     }
 
     private boolean checkPermissions(PluginCall call, String permissionAlias) {
         if (getPermissionState(permissionAlias) != PermissionState.GRANTED) {
-            Log.d(TAG_PERMISSION, "Asking for bluetooth permission ...");
             requestPermissionForAlias(permissionAlias, call, "bluetoothPermissionsCallback");
             return false;
         }
-
         return true;
     }
 
@@ -531,12 +505,15 @@ public class BluetoothSerialPlugin extends Plugin {
     @PermissionCallback
     private void bluetoothPermissionsCallback(PluginCall call) {
         if (call == null) {
-            Log.d(TAG_PERMISSION, "Bluetooth permission callback: missing plugin call (already resolved or rejected ?)");
             return;
         }
 
-        if (getPermissionState() == PermissionState.GRANTED) {
-            Log.d(TAG_PERMISSION, "Bluetooth permission granted");
+        boolean granted = getPermissionState() == PermissionState.GRANTED;
+        JSObject result = new JSObject();
+        result.put("granted", granted);
+        notifyListeners(ON_BLUETOOTH_PERMISSION_RESULT_EVENT, result);
+
+        if (granted) {
             // Continue to the source method
             switch (call.getMethodName()) {
                 case "disable":
@@ -554,7 +531,6 @@ public class BluetoothSerialPlugin extends Plugin {
                     break;
             }
         } else {
-            Log.d(TAG_PERMISSION, ERROR_PERMISSION_DENIED);
             call.reject(ERROR_PERMISSION_DENIED);
         }
     }
@@ -591,7 +567,7 @@ public class BluetoothSerialPlugin extends Plugin {
     }
 
     private boolean isEnabled() {
-        return this.hasBluetoothFeature() && getPermissionState() == PermissionState.GRANTED && bluetoothAdapter.isEnabled();
+        return this.hasBluetoothFeature() && bluetoothAdapter.isEnabled();
     }
 
     private boolean isDisabled() {
@@ -638,7 +614,8 @@ public class BluetoothSerialPlugin extends Plugin {
     }
 
     private boolean getCanEnable() {
-        // Version prior API 31 (S) and after or equals 33 (TIRAMISU) cannot enable bluetooth
+        // Version prior API 31 (S) and after or equals 33 (TIRAMISU) cannot enable
+        // bluetooth
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU;
     }
 
