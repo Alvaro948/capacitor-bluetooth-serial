@@ -102,7 +102,7 @@ public class BluetoothSerialPlugin extends Plugin {
         }
 
         // Ask permission, and enable if need
-        if (checkBluetoothPermissions(call)) {
+        if (checkPermissions(call, getPermissionAlias())) {
             boolean enabled = bluetoothAdapter.enable();
             resolveState(call, enabled);
         }
@@ -126,7 +126,7 @@ public class BluetoothSerialPlugin extends Plugin {
         }
 
         // Ask permission, and enable if need
-        if (checkBluetoothPermissions(call)) {
+        if (checkPermissions(call, getPermissionAlias())) {
             boolean disabled = bluetoothAdapter.disable();
             resolveState(call, !disabled);
         }
@@ -486,7 +486,17 @@ public class BluetoothSerialPlugin extends Plugin {
 
     @PluginMethod
     public boolean checkBluetoothPermissions(PluginCall call) {
-        return checkPermissions(call, getPermissionAlias());
+        // If already granted, resolve immediately
+        if (getPermissionState(getPermissionAlias()) == PermissionState.GRANTED) {
+            JSObject result = new JSObject();
+            result.put("granted", true);
+            call.resolve(result);
+            return true;
+        }
+
+        // Otherwise request permission - the callback will resolve the call
+        requestPermissionForAlias(getPermissionAlias(), call, "bluetoothPermissionsCallback");
+        return false;
     }
 
     private boolean checkPermissions(PluginCall call, String permissionAlias) {
@@ -553,7 +563,7 @@ public class BluetoothSerialPlugin extends Plugin {
     }
 
     private boolean rejectIfDisabled(PluginCall call) {
-        if (!checkBluetoothPermissions(call)) {
+        if (!checkPermissions(call, getPermissionAlias())) {
             return true;
         }
 
@@ -620,6 +630,6 @@ public class BluetoothSerialPlugin extends Plugin {
     }
 
     private PermissionState getPermissionState() {
-        return getPermissionState(getPermissionAlias());
+        return super.getPermissionState(getPermissionAlias());
     }
 }
