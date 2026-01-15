@@ -11,7 +11,7 @@
     "android/build.gradle",
     "dist/",
     "ios/Plugin/",
-    "asc_CapacitorBluetoothSerial.podspec"
+    "AscentioItCapacitorBluetoothSerial.podspec"
   ],
   "scripts": {
     "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
