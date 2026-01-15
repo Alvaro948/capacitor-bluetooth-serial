@@ -1,6 +1,6 @@
 
   Pod::Spec.new do |s|
-    s.name = 'asc_CapacitorBluetoothSerial'
+    s.name = 'AscentioItCapacitorBluetoothSerial'
     s.version = '7.5.0'
     s.summary = 'Capacitor Bluetooth Serial Plugin'
     s.license = 'MIT'
